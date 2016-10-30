@@ -1,0 +1,100 @@
+---
+title: "Walmart Sales In Relation To Store Identity and Regional Activities"
+author: "Quynh Nguyen (qmn76), Hanna Jones (hmj427), Mark Metzger (mm73828)"
+date: "November 7, 2016"
+output: 
+  html_document:
+    toc: true
+---
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Finding & Processing Data
+
+### STEP 1: Find a dataset. 
+
+Public datasets are available on sites such as the [United States Census Bureau](http://www.census.gov/), [Reddit](https://www.reddit.com/r/datasets), and [UCI](https://archive.ics.uci.edu/ml/datasets/).
+
+In this case, we a found a set of data that Walmart published for Kaggle, a data science competition site, that includes store information, historic weekly sales, miscillaneous factor that includes sale for 45 stores. The original data set is published [here](https://www.kaggle.com/c/walmart-recruiting-store-sales-forecasting/data).
+
+Unlike the data set we used previously, the data is broken into many files/tables. The three tables that we used for this project are:
+
++ stores.csv (includes anonymized information about the stores)
++ train.csv (incldues historical training date from 2010-02-05 to 2012-11-01) 
++ features.csv (includes misc. information related to store, department, regional activity for each week)
+
+Here's the description for each column name in the data file.
+
+##### Train.csv
+
+Name of Column | Description
+------------- | -------------
+Store | the store number
+Dept | the department number
+Date | the week
+Weekly_Sales | sales for the given department in the given store
+IsHoliday | whether the week is a special holiday week
+
+```{r}
+train_df <- read.csv("../01 Data/train.csv", nrows = 50, stringsAsFactors = FALSE)
+
+```
+
+##### Train.csv
+
+Name of Column | Description
+------------- | -------------
+Store | the store number
+Type | type of store
+Size | size of store
+```{r}
+read.csv("../01 Data/stores.csv", stringsAsFactors = FALSE)
+```
+
+##### Features.csv
+
+Name of Column | Description
+------------- | -------------
+Store | the store number
+Date | the week
+Temperature | average temperature in the region
+Fuel_Price | cost of fuel in the region
+MarkDown1-5 | anonymized data related to promotional markdowns that Walmart is running. MarkDown data is only available after Nov 2011, and is not available for all stores all the time. Any missing value is marked with an NA.
+CPI | the consumer price index
+Unemployment | the unemployment rate
+IsHoliday | whether the week is a special holiday week
+
+```{r}
+read.csv("../01 Data/stores.csv", nrows=50, stringsAsFactors = FALSE)
+```
+
+### STEP 2: Clean up the data Using Extract, Transform, and Load techniques.
+
+The process of ETL is straightforward. We read in the file, figure out what columns are considered dimensions and measured and process numbers as needed.
+
+After running the R_ETL script, we copy & paste the cat(sql) result and run it in SQL Developer to create new tables. One thing to note that some names are not valid as column names in SQL to we changed them. For example, Store is renamed to Store_Id, Date is renamed to Date_of_Week, and so on. In addition, the R_ETL also outputs a reformatted version where the data is cleaned up nicely to meet the standards for importing to SQL database, which we then use to import in the databse. At this stage, it's neccessary to also match the old column names to the new column names we dictated when we first create the empty table.
+
+Below is the SQL query used to gather data from all three tables using inner join.
+
+```
+select walmart_train.store_id, 
+walmart_train.dept, 
+walmart_train.date_of_week, 
+walmart_train.isholiday, 
+walmart_train.weekly_sales, 
+walmart_stores.type_of_store, 
+walmart_stores.size_of_store, 
+walmart_features.fuel_price,
+walmart_features.temperature,
+walmart_features.cpi,
+walmart_features.unemployment
+from walmart_train, walmart_stores, walmart_features
+where walmart_train.store_id = walmart_stores.store_id
+and walmart_train.store_id = walmart_features.store_id
+and walmart_train.date_of_week = walmart_features.date_of_week
+```
+This way we can have a comprehensive way of viewing the weekly sales data as long as all the other factors that could have affected it.
