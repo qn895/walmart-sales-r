@@ -2,9 +2,11 @@
 title: "Walmart Sales In Relation To Store Identity and Regional Activities"
 author: "Quynh Nguyen (qmn76), Hanna Jones (hmj427), Mark Metzger (mm73828)"
 date: "November 7, 2016"
-output: 
+output:
   html_document:
-    toc: true
+    toc: yes
+  html_notebook:
+    toc: yes
 ---
 
 ## Session Info
@@ -78,12 +80,16 @@ The process of ETL is straightforward. We read in the file, figure out what colu
 
 After running the R_ETL script, we copy & paste the cat(sql) result and run it in SQL Developer to create new tables. One thing to note that some names are not valid as column names in SQL to we changed them. For example, Store is renamed to Store_Id, Date is renamed to Date_of_Week, and so on. In addition, the R_ETL also outputs a reformatted version where the data is cleaned up nicely to meet the standards for importing to SQL database, which we then use to import in the databse. At this stage, it's neccessary to also match the old column names to the new column names we dictated when we first create the empty table.
 
-Below is the SQL query used to gather data from all three tables using inner join.
+
+### STEP 3: Plot Data With Tableau
+
+The SQL query used to gather data from all three tables using inner join in Tableau is a little bit different from the sql query for R.
 
 ```
 select walmart_train.store_id, 
 walmart_train.dept, 
-walmart_train.date_of_week, 
+TO_DATE(walmart_train.DATE_OF_WEEK,'YYYY-MM-DD') as real_date,
+walmart_train.DATE_OF_WEEK,
 walmart_train.isholiday, 
 walmart_train.weekly_sales, 
 walmart_stores.type_of_store, 
@@ -95,6 +101,29 @@ walmart_features.unemployment
 from walmart_train, walmart_stores, walmart_features
 where walmart_train.store_id = walmart_stores.store_id
 and walmart_train.store_id = walmart_features.store_id
-and walmart_train.date_of_week = walmart_features.date_of_week
+and walmart_train.DATE_OF_WEEK = TO_CHAR(TO_DATE(walmart_features.DATE_OF_WEEK,'MM/DD/YYYY'), 'YYYY-MM-DD')
 ```
+
 This way we can have a comprehensive way of viewing the weekly sales data as long as all the other factors that could have affected it.
+
+Also note that in order to not run into any error in Tableau, we have made a another column called **real_date** column where we convert the format of the string to YYYY-MM-DD. If not, we will run into an error where Tableau has a problem transforming and retrieving data with the query.
+
+#### Weekly Sales Bar Chart By Store ID/Type of Store, Sized and Colored By Size of Store
+
+![](../02 Tableau/weeklySalesByStoreIdTypeOfStore.png)
+
+#### Weekly Sales Box Plot by Month and Year, Colored By Type Of Store
+
+![](../02 Tableau/weeklySalesBoxPlot.png)
+
+#### Weekly Sales In Correlation To Temperature and Fuel Price
+
+![](../02 Tableau/weeklySalesVsTempAndFuelPriceAndCPI.png)
+
+#### Weekly Sales By Department
+
+![](../02 Tableau/weeklySalesByDepartment.png)
+
+#### Treemap of Sales
+
+![](../02 Tableau/weeklySalesTreeMap.png)
