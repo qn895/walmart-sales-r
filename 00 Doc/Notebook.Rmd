@@ -143,3 +143,14 @@ We can also see the trend for each department over the years. One thing to note 
 #### Treemap of Sales
 
 ![](../02 Tableau/weeklySalesTreeMap.png)
+
+### Weekly Sales Time Series
+
+![](../02 Tableau/weeklySalesTimeSeries2010.png)
+![](../02 Tableau/weeklySalesTimeSeries2011.png)
+
+As we can tell, during the months of April, July, and October sales are highest, with a huge spike in December. Of course, December is expected due to the holiday season, but this graph gives a better understanding the less obvious sales trends and ultimately can help Walmart in stocking their shelves.
+
+![](../02 Tableau/weeklySalesTimeSeries2012.png)
+
+We also utilized the trend-line to predict sales for the coming months in late 2012, for which we do not have data. The result confirms our hypothesis that December sales are much higher than other months.
