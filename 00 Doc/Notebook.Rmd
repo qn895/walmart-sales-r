@@ -112,17 +112,33 @@ Also note that in order to not run into any error in Tableau, we have made a ano
 
 ![](../02 Tableau/weeklySalesByStoreIdTypeOfStore.png)
 
+In this visualization, we plotted in the form of bar charts the weekly sales against the Store ID. We also color the bar from smallest store to largest store (light to dark). By doing so, we noticed an interesting correlation where where stores with higher sales are typically bigger, which makes sense. So further solidify this observation, we trellised the plot by the  type of store and plotted the average line for each panel. Thus, we noticed that Type of Store A are probably SuperStore with bigger size and higher sales. On the other hand, Type B is smaller and is probably the normal store.
+
+Interestingly, we can see that the trend is that the larger the store, and the larger the sales. That's what we see in both subplots. However, based on this, we can also see underperforming as well as excellent store. For example, Store 1 is actually averaging 200M weekly sales despite being one of the smaller stores in the type A bunch. Likewise, Store 9 performs worst than Store 7 despite being bigger. We can try to identify what causes this later one using other factors such as Temperature, Fuel Price, etc.
+
 #### Weekly Sales Box Plot by Month and Year, Colored By Type Of Store
 
 ![](../02 Tableau/weeklySalesBoxPlot.png)
+
+In this visualizationn  we graph the weekly sales year and month. We also plotted the average weekly sales for each year. We can see that over the span of 3 years, the average sales mainly stay the same around 18-19K. Howeverr, one interesting thing to notice is the seasonal trend. The sales almost make a curve where it has a small peak during June, decreases, and then returns to the highest peak in November and December.
+
+By coloring the data points by type of store we can also see that the lower range of the sales are from smaller stores (Type B) and higher end of the sales are thanks to larger store (Type A).
+
+Another thing from this plot is that we can see we didn't have any data for January 2010 and November - December 2012 so any correlation we notice from other plots needs to be carefuly considered whether it's because we don't have data or because of some other factors.
 
 #### Weekly Sales In Correlation To Temperature and Fuel Price
 
 ![](../02 Tableau/weeklySalesVsTempAndFuelPriceAndCPI.png)
 
+This plot tries to find the correlation between sales and temperature and fuel price. It seems that fuel price tends to drive sales more so than tmperature. A fuel price decrease tends to lead to increasinng sales and vice versa. However, as temperature drops in Quarter 4, sales has a much more significant lead. This could be contributed to Black Friday and Holiday sales.
+
 #### Weekly Sales By Department
 
 ![](../02 Tableau/weeklySalesByDepartment.png)
+
+For this visualization, we plotted the weekly sales, colored by department in the form of area chart. We can see that some departments (e.g. 38, 40, 72 and 95) consistently contribute to the overall sales in large percentange.
+
+We can also see the trend for each department over the years. One thing to note is that it could also lead to erroneous conclusion. For example, department 38 tends to increase in sales toward the final quarter. However, in 2012, it decreases in an almost linear manner. Which we **think** is bad. However, this could be explained due to the lack of data for November and December for 2012. 
 
 #### Treemap of Sales
 
