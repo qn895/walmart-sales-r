@@ -80,6 +80,10 @@ The process of ETL is straightforward. We read in the file, figure out what colu
 
 After running the R_ETL script, we copy & paste the cat(sql) result and run it in SQL Developer to create new tables. One thing to note that some names are not valid as column names in SQL to we changed them. For example, Store is renamed to Store_Id, Date is renamed to Date_of_Week, and so on. In addition, the R_ETL also outputs a reformatted version where the data is cleaned up nicely to meet the standards for importing to SQL database, which we then use to import in the databse. At this stage, it's neccessary to also match the old column names to the new column names we dictated when we first create the empty table.
 
+```{r}
+source("../01 Data/Data.R", echo = TRUE)
+```
+
 
 ### STEP 3: Plot Data With Tableau
 

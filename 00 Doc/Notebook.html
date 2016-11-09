@@ -139,7 +139,7 @@ $(document).ready(function () {
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.1 (2016-06-21)
 ## Platform: x86_64-apple-darwin13.4.0 (64-bit)
-## Running under: OS X 10.11.6 (El Capitan)
+## Running under: OS X 10.10.5 (Yosemite)
 ## 
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -149,7 +149,7 @@ $(document).ready(function () {
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] magrittr_1.5       assertthat_0.1     tools_3.3.1       
-##  [4] htmltools_0.3.5    yaml_2.1.13        tibble_1.1        
+##  [4] htmltools_0.3.5    yaml_2.1.13        tibble_1.2        
 ##  [7] Rcpp_0.12.6        stringi_1.1.1      rmarkdown_1.0.9013
 ## [10] knitr_1.14         stringr_1.1.0      digest_0.6.10     
 ## [13] evaluate_0.9</code></pre>
@@ -374,6 +374,180 @@ $(document).ready(function () {
 <h3>STEP 2: Clean up the data Using Extract, Transform, and Load techniques.</h3>
 <p>The process of ETL is straightforward. We read in the file, figure out what columns are considered dimensions and measured and process numbers as needed.</p>
 <p>After running the R_ETL script, we copy &amp; paste the cat(sql) result and run it in SQL Developer to create new tables. One thing to note that some names are not valid as column names in SQL to we changed them. For example, Store is renamed to Store_Id, Date is renamed to Date_of_Week, and so on. In addition, the R_ETL also outputs a reformatted version where the data is cleaned up nicely to meet the standards for importing to SQL database, which we then use to import in the databse. At this stage, it’s neccessary to also match the old column names to the new column names we dictated when we first create the empty table.</p>
+<pre class="r"><code>source(&quot;../01 Data/Data.R&quot;, echo = TRUE)</code></pre>
+<pre><code>## 
+## &gt; require(&quot;RCurl&quot;)</code></pre>
+<pre><code>## Loading required package: RCurl</code></pre>
+<pre><code>## Loading required package: bitops</code></pre>
+<pre><code>## 
+## &gt; require(&quot;jsonlite&quot;)</code></pre>
+<pre><code>## Loading required package: jsonlite</code></pre>
+<pre><code>## 
+## &gt; require(&quot;dplyr&quot;)</code></pre>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: 'dplyr'</code></pre>
+<pre><code>## The following objects are masked from 'package:stats':
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre><code>## 
+## &gt; walmart_features &lt;- data.frame(fromJSON(getURL(URLencode(&quot;oraclerest.cs.utexas.edu:5001/rest/native/?query=\&quot;select * from WALMART_FEATURES\&quot;&quot;), 
+## +  .... [TRUNCATED] 
+## 
+## &gt; walmart_stores &lt;- data.frame(fromJSON(getURL(URLencode(&quot;oraclerest.cs.utexas.edu:5001/rest/native/?query=\&quot;select * from WALMART_STORES\&quot;&quot;), 
+## +      .... [TRUNCATED] 
+## 
+## &gt; walmart_train &lt;- data.frame(fromJSON(getURL(URLencode(&quot;oraclerest.cs.utexas.edu:5001/rest/native/?query=\&quot;select * from WALMART_TRAIN where store_id .... [TRUNCATED] 
+## 
+## &gt; walmart_features$DATE_OF_WEEK &lt;- as.Date(walmart_features$DATE_OF_WEEK, 
+## +     &quot;%m/%d/%Y&quot;)
+## 
+## &gt; walmart_train$DATE_OF_WEEK &lt;- as.Date(walmart_train$DATE_OF_WEEK, 
+## +     &quot;%Y-%m-%d&quot;)
+## 
+## &gt; data = merge(merge(walmart_train, walmart_features, 
+## +     by = c(&quot;STORE_ID&quot;, &quot;DATE_OF_WEEK&quot;), all = FALSE), walmart_stores, 
+## +     by = &quot;STORE_ID&quot;)
+## 
+## &gt; names(data)
+##  [1] &quot;STORE_ID&quot;      &quot;DATE_OF_WEEK&quot;  &quot;DEPT&quot;          &quot;ISHOLIDAY.x&quot;  
+##  [5] &quot;WEEKLY_SALES&quot;  &quot;ISHOLIDAY.y&quot;   &quot;TEMPERATURE&quot;   &quot;FUEL_PRICE&quot;   
+##  [9] &quot;MARKDOWN1&quot;     &quot;MARKDOWN2&quot;     &quot;MARKDOWN3&quot;     &quot;MARKDOWN4&quot;    
+## [13] &quot;MARKDOWN5&quot;     &quot;CPI&quot;           &quot;UNEMPLOYMENT&quot;  &quot;TYPE_OF_STORE&quot;
+## [17] &quot;SIZE_OF_STORE&quot;
+## 
+## &gt; summary(data)
+##     STORE_ID      DATE_OF_WEEK             DEPT       ISHOLIDAY.x  
+##  Min.   :1.000   Min.   :2010-02-05   Min.   : 1.00   FALSE:54834  
+##  1st Qu.:2.000   1st Qu.:2010-10-08   1st Qu.:19.00   TRUE : 4166  
+##  Median :3.000   Median :2011-06-17   Median :36.00                
+##  Mean   :3.478   Mean   :2011-06-17   Mean   :43.45                
+##  3rd Qu.:5.000   3rd Qu.:2012-02-24   3rd Qu.:71.00                
+##  Max.   :6.000   Max.   :2012-10-26   Max.   :99.00                
+##                                                                    
+##   WEEKLY_SALES    ISHOLIDAY.y    TEMPERATURE      FUEL_PRICE   
+##  Min.   : -1098   FALSE:54834   Min.   :28.84   Min.   :2.514  
+##  1st Qu.:  2527   TRUE : 4166   1st Qu.:56.99   1st Qu.:2.759  
+##  Median :  8138                 Median :69.68   Median :3.290  
+##  Mean   : 19053                 Mean   :68.02   Mean   :3.219  
+##  3rd Qu.: 23510                 3rd Qu.:81.02   3rd Qu.:3.594  
+##  Max.   :385051                 Max.   :93.34   Max.   :3.907  
+##                                                                
+##             MARKDOWN1                MARKDOWN2    
+##  null            :37884   null            :41889  
+##  12635.1904296875:   74   7.6399998664856 :  216  
+##  2725.36010742188:   74   5.73000001907349:  206  
+##  2971.0400390625 :   74   16              :  144  
+##  429.029998779297:   74   3.8199999332428 :  143  
+##  561.450012207031:   74   7               :  139  
+##  (Other)         :20746   (Other)         :16263  
+##             MARKDOWN3                MARKDOWN4    
+##  null            :39252   null            :38217  
+##  3               :  272   8               :  140  
+##  1.64999997615814:  217   15              :   74  
+##  8.10999965667725:  145   24.8999996185303:   74  
+##  24.6000003814697:  144   44.0400009155273:   74  
+##  6               :  143   4767.85986328125:   74  
+##  (Other)         :18827   (Other)         :20347  
+##             MARKDOWN5                   CPI       
+##  null            :37884   130.719604492188:  143  
+##  2739.42993164062:   74   126.496299743652:   75  
+##  28604.19921875  :   74   126.471298217773:   74  
+##  6437.60986328125:   74   126.552299499512:   74  
+##  6779.43017578125:   74   126.606597900391:   74  
+##  9239.23046875   :   74   129.836395263672:   74  
+##  (Other)         :20746   (Other)         :58486  
+##            UNEMPLOYMENT   TYPE_OF_STORE SIZE_OF_STORE   
+##  7.83799982070923: 1010   A:40965       Min.   : 34875  
+##  8.16300010681152: 1003   B:18035       1st Qu.: 37392  
+##  7.1269998550415 : 1002   C:    0       Median :202307  
+##  6.92500019073486:  996                 Mean   :143312  
+##  7.96199989318848:  995                 3rd Qu.:202505  
+##  7.85200023651123:  994                 Max.   :205863  
+##  (Other)         :53000                                 
+## 
+## &gt; head(data)
+##   STORE_ID DATE_OF_WEEK DEPT ISHOLIDAY.x WEEKLY_SALES ISHOLIDAY.y
+## 1        1   2010-02-05   16       FALSE     10217.55       FALSE
+## 2        1   2010-02-05   54       FALSE       439.00       FALSE
+## 3        1   2010-02-05   13       FALSE     41969.29       FALSE
+## 4        1   2010-02-05   27       FALSE      2293.00       FALSE
+## 5        1   2010-02-05   30       FALSE      5491.00       FALSE
+## 6        1   2010-02-05   49       FALSE     11501.46       FALSE
+##   TEMPERATURE FUEL_PRICE MARKDOWN1 MARKDOWN2 MARKDOWN3 MARKDOWN4 MARKDOWN5
+## 1       42.31      2.572      null      null      null      null      null
+## 2       42.31      2.572      null      null      null      null      null
+## 3       42.31      2.572      null      null      null      null      null
+## 4       42.31      2.572      null      null      null      null      null
+## 5       42.31      2.572      null      null      null      null      null
+## 6       42.31      2.572      null      null      null      null      null
+##                CPI     UNEMPLOYMENT TYPE_OF_STORE SIZE_OF_STORE
+## 1 211.096405029297 8.10599994659424             A        151315
+## 2 211.096405029297 8.10599994659424             A        151315
+## 3 211.096405029297 8.10599994659424             A        151315
+## 4 211.096405029297 8.10599994659424             A        151315
+## 5 211.096405029297 8.10599994659424             A        151315
+## 6 211.096405029297 8.10599994659424             A        151315
+## 
+## &gt; subset &lt;- subset(data, STORE_ID == 2)
+## 
+## &gt; head(subset)
+##       STORE_ID DATE_OF_WEEK DEPT ISHOLIDAY.x WEEKLY_SALES ISHOLIDAY.y
+## 10245        2   2010-02-05   91       FALSE     88433.59       FALSE
+## 10246        2   2010-02-05    9       FALSE     24162.08       FALSE
+## 10247        2   2010-02-05   23       FALSE     31836.69       FALSE
+## 10248        2   2010-02-05   21       FALSE     12636.72       FALSE
+## 10249        2   2010-02-05   55       FALSE     17657.65       FALSE
+## 10250        2   2010-02-05   56       FALSE      2024.13       FALSE
+##       TEMPERATURE FUEL_PRICE MARKDOWN1 MARKDOWN2 MARKDOWN3 MARKDOWN4
+## 10245       40.19      2.572      null      null      null      null
+## 10246       40.19      2.572      null      null      null      null
+## 10247       40.19      2.572      null      null      null      null
+## 10248       40.19      2.572      null      null      null      null
+## 10249       40.19      2.572      null      null      null      null
+## 10250       40.19      2.572      null      null      null      null
+##       MARKDOWN5              CPI     UNEMPLOYMENT TYPE_OF_STORE
+## 10245      null 210.752593994141 8.32400035858154             A
+## 10246      null 210.752593994141 8.32400035858154             A
+## 10247      null 210.752593994141 8.32400035858154             A
+## 10248      null 210.752593994141 8.32400035858154             A
+## 10249      null 210.752593994141 8.32400035858154             A
+## 10250      null 210.752593994141 8.32400035858154             A
+##       SIZE_OF_STORE
+## 10245        202307
+## 10246        202307
+## 10247        202307
+## 10248        202307
+## 10249        202307
+## 10250        202307
+## 
+## &gt; subset &lt;- subset(data, TEMPERATURE &lt;= 60)
+## 
+## &gt; head(subset)
+##   STORE_ID DATE_OF_WEEK DEPT ISHOLIDAY.x WEEKLY_SALES ISHOLIDAY.y
+## 1        1   2010-02-05   16       FALSE     10217.55       FALSE
+## 2        1   2010-02-05   54       FALSE       439.00       FALSE
+## 3        1   2010-02-05   13       FALSE     41969.29       FALSE
+## 4        1   2010-02-05   27       FALSE      2293.00       FALSE
+## 5        1   2010-02-05   30       FALSE      5491.00       FALSE
+## 6        1   2010-02-05   49       FALSE     11501.46       FALSE
+##   TEMPERATURE FUEL_PRICE MARKDOWN1 MARKDOWN2 MARKDOWN3 MARKDOWN4 MARKDOWN5
+## 1       42.31      2.572      null      null      null      null      null
+## 2       42.31      2.572      null      null      null      null      null
+## 3       42.31      2.572      null      null      null      null      null
+## 4       42.31      2.572      null      null      null      null      null
+## 5       42.31      2.572      null      null      null      null      null
+## 6       42.31      2.572      null      null      null      null      null
+##                CPI     UNEMPLOYMENT TYPE_OF_STORE SIZE_OF_STORE
+## 1 211.096405029297 8.10599994659424             A        151315
+## 2 211.096405029297 8.10599994659424             A        151315
+## 3 211.096405029297 8.10599994659424             A        151315
+## 4 211.096405029297 8.10599994659424             A        151315
+## 5 211.096405029297 8.10599994659424             A        151315
+## 6 211.096405029297 8.10599994659424             A        151315</code></pre>
 </div>
 <div id="step-3-plot-data-with-tableau" class="section level3">
 <h3>STEP 3: Plot Data With Tableau</h3>
