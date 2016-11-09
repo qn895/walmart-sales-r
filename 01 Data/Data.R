@@ -2,31 +2,16 @@ require("RCurl")
 require("jsonlite")
 require("dplyr")
 
-# Read in data from DB
-df <- data.frame(fromJSON(getURL(URLencode('oraclerest.cs.utexas.edu:5001/rest/native/?query="select walmart_train.store_id, walmart_train.dept, 
-                                           walmart_train.DATE_OF_WEEK,
-                                           walmart_train.isholiday, 
-                                           walmart_train.weekly_sales, 
-                                           walmart_stores.type_of_store, 
-                                           walmart_stores.size_of_store, 
-                                           walmart_features.fuel_price,
-                                           walmart_features.temperature,
-                                           walmart_features.cpi,
-                                           walmart_features.unemployment
-                                           from walmart_train, walmart_stores, walmart_features
-                                           where walmart_train.store_id = walmart_stores.store_id
-                                           and walmart_train.store_id = walmart_features.store_id
-                                           and walmart_train.DATE_OF_WEEK = walmart_features.DATE_OF_WEEK
-                                           "'),httpheader=c(DB='jdbc:oracle:thin:@aevum.cs.utexas.edu:1521/f16pdb', USER='cs329e_qmn76', PASS='orcl_qmn76', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)))
+walmart_stores <- data.frame(fromJSON(getURL(URLencode('oraclerest.cs.utexas.edu:5001/rest/native/?query="select * from walmart_stores"'),httpheader=c(DB='jdbc:oracle:thin:@aevum.cs.utexas.edu:1521/f16pdb', USER='cs329e_qmn76', PASS='orcl_qmn76', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)))
 
+walmart_features <- data.frame(fromJSON(getURL(URLencode('oraclerest.cs.utexas.edu:5001/rest/native/?query="select * from walmart_features"'),httpheader=c(DB='jdbc:oracle:thin:@aevum.cs.utexas.edu:1521/f16pdb', USER='cs329e_qmn76', PASS='orcl_qmn76', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)))
+
+walmart_train <- data.frame(fromJSON(getURL(URLencode('oraclerest.cs.utexas.edu:5001/rest/native/?query="select * from walmart_train where store_id in (1,2,3,4,5,6,7,8)"'),httpheader=c(DB='jdbc:oracle:thin:@aevum.cs.utexas.edu:1521/f16pdb', USER='cs329e_qmn76', PASS='orcl_qmn76', MODE='native_mode', MODEL='model', returnDimensions = 'False', returnFor = 'JSON'), verbose = TRUE)))
 
 #Display column names
 names(df)
 
 # Display a subset and summary of the data frame 
-summary(df)
-head(df)
+summary(walmart_train)
+head(walmart_train)
 
-## Get only data for store 5
-subset <- subset(df, STORE_ID = 5)
-head(subset)
